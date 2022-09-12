@@ -17,6 +17,8 @@ if(NOT EXISTS ${_proto_file_path})
     )
 endif()
 
+# generate command is inside find module
+include(FindProtobuf)
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${_proto_file_path})
 
 target_sources(helloworldserver PRIVATE ${PROTO_SRCS} ${PROTO_HDRS})

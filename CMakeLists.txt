@@ -11,8 +11,16 @@ FetchContent_Declare(winasio
 FetchContent_GetProperties(winasio)
 if(NOT winasio_POPULATED)
   FetchContent_Populate(winasio)
-  add_subdirectory(${winasio_SOURCE_DIR} ${winasio_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
+
+# format
+include(${winasio_SOURCE_DIR}/cmake/clang-format.cmake)
+if(WINASIO_CI_FORMAT)
+    message(STATUS "Only added format target.")
+    return()
+endif()
+
+add_subdirectory(${winasio_SOURCE_DIR} ${winasio_BINARY_DIR} EXCLUDE_FROM_ALL)
 
 # import protobuf
 message(STATUS "fetching protobuf")
@@ -31,21 +39,6 @@ if(NOT protobuf_POPULATED)
   FetchContent_Populate(protobuf)
   add_subdirectory(${protobuf_SOURCE_DIR} ${protobuf_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
-#protoc-21.3-win64.zip
-
-message(STATUS ${protobuf_BINARY_DIR})
-
-set(Protobuf_LIBRARIES ${protobuf_BINARY_DIR})
-set(Protobuf_INCLUDE_DIR ${protobuf_SOURCE_DIR}/src)
-include(FindProtobuf)
-find_package(Protobuf REQUIRED)
-
-# format
-include(${winasio_SOURCE_DIR}/cmake/clang-format.cmake)
-if(WINASIO_CI_FORMAT)
-    message(STATUS "Only added format target.")
-    return()
-endif()
 
 add_library(wingrpc INTERFACE)
 target_include_directories(wingrpc INTERFACE
@@ -55,5 +48,7 @@ target_include_directories(wingrpc INTERFACE
 target_link_libraries(wingrpc
     INTERFACE winasio
 )
+
+add_subdirectory(generator)
 
 add_subdirectory(examples/helloworld)

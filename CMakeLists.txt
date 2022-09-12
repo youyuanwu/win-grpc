@@ -47,4 +47,13 @@ if(WINASIO_CI_FORMAT)
     return()
 endif()
 
+add_library(wingrpc INTERFACE)
+target_include_directories(wingrpc INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_link_libraries(wingrpc
+    INTERFACE winasio
+)
+
 add_subdirectory(examples/helloworld)

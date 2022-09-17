@@ -1,6 +1,6 @@
 set (CMAKE_CXX_STANDARD 20)
 
-add_executable(helloworldserver main.cpp helloworld_grpc_generated.cpp)
+add_executable(helloworldserver main.cpp)
 
 target_link_libraries(helloworldserver PRIVATE wingrpc libprotobuf)
 
@@ -19,9 +19,23 @@ endif()
 
 # generate command is inside find module
 include(FindProtobuf)
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${_proto_file_path})
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${_proto_file_path}
+#    PLUGIN "protoc-gen-grpc=$<TARGET_FILE:grpc_cpp_plugin>"
+#    PLUGIN_OPTIONS --grpc_out ${CMAKE_CURRENT_BINARY_DIR}
+)
+protobuf_generate(LANGUAGE grpc
+    PLUGIN "protoc-gen-grpc=$<TARGET_FILE:win_grpc_cpp_plugin>"
+    #PLUGIN "protoc-gen-grpc=$<TARGET_FILE:grpc_cpp_plugin>"
+    OUT_VAR GRPC_SRCS
+    APPEND_PATH
+    GENERATE_EXTENSIONS
+        .win_grpc.pb.h
+        .win_grpc.pb.cc
+    PROTOS ${_proto_file_path}
+)
 
-target_sources(helloworldserver PRIVATE ${PROTO_SRCS} ${PROTO_HDRS})
+
+target_sources(helloworldserver PRIVATE ${PROTO_SRCS} ${PROTO_HDRS} ${GRPC_SRCS})
 
 target_include_directories(helloworldserver
     PRIVATE ${CMAKE_CURRENT_BINARY_DIR}

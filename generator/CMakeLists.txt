@@ -49,3 +49,23 @@ target_include_directories(grpc_cpp_plugin
 target_link_libraries(grpc_cpp_plugin PRIVATE libprotobuf libprotoc)
 
 # protobuf-src\src\google\protobuf\compiler\plugin.cc is used by the plugin
+
+# win generator
+
+set(WIN_SOURCES
+win_cpp_plugin.cpp
+win_cpp_plugin.hpp
+win_grpc_generator.cpp
+win_grpc_generator.hpp
+)
+
+add_executable(win_grpc_cpp_plugin 
+  ${WIN_SOURCES}
+)
+
+target_include_directories(win_grpc_cpp_plugin
+  PRIVATE . 
+  PRIVATE ${grpc_SOURCE_DIR} ${grpc_SOURCE_DIR}/include
+)
+
+target_link_libraries(win_grpc_cpp_plugin PRIVATE libprotobuf libprotoc)

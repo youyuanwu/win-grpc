@@ -58,7 +58,7 @@ template <typename Request, typename Reply>
 inline void handle_request(
     boost::system::error_code &ec, const std::string &request_str,
     std::string &reply_str,
-    std::function<void(boost::system::error_code &ec, const Request &, Reply &)>
+    std::function<void(boost::system::error_code &ec, const Request *, Reply *)>
         op) {
   Request req;
   parse_length_prefixed_message(ec, request_str, req);
@@ -70,7 +70,7 @@ inline void handle_request(
   }
 
   Reply reply;
-  op(ec, req, reply);
+  op(ec, &req, &reply);
 
   if (ec) {
     // TODO
@@ -80,60 +80,73 @@ inline void handle_request(
   encode_length_prefixed_message(reply, reply_str);
 }
 
-class router {
+// grpc service
+class Service {
 public:
-  template <typename Request, typename Reply>
-  void add_operation(std::wstring url,
-                     std::function<void(boost::system::error_code &ec,
-                                        const Request &, Reply &)>
-                         op) {
-    this->add_route(url, op);
-  }
+  virtual bool HandleRequest(boost::system::error_code &ec,
+                             std::wstring const &url,
+                             std::string const &request,
+                             std::string &response) = 0;
+};
 
-  // returns the std::function
-  template <typename Request, typename Reply>
-  auto resolve_operation(boost::system::error_code &ec, std::wstring url) {
-    std::any any_op;
-    this->resolve(ec, any_op, url);
-
-    using operation_type = std::function<void(boost::system::error_code & ec,
-                                              const Request &, Reply &)>;
-
-    if (ec) {
-      BOOST_LOG_TRIVIAL(debug) << "fail to resolve";
-      return operation_type();
+class ServiceMiddleware {
+public:
+  inline void add_service(Service &service) { services_.push_back(service); }
+  inline bool handle_request(boost::system::error_code &ec,
+                             std::wstring const &url,
+                             std::string const &request,
+                             std::string &response) {
+    // go through service one by one and dispatch
+    for (auto &service : services_) {
+      bool found = service.get().HandleRequest(ec, url, request, response);
+      if (found) {
+        return true;
+      }
     }
-    auto fn = std::any_cast<operation_type>(any_op);
-    return fn;
-  }
-
-  template <typename Request, typename Reply>
-  void dispatch(boost::system::error_code &ec, std::wstring url,
-                const std::string request_str, std::string &reply_str) {
-    auto fn = this->resolve_operation<Request, Reply>(ec, url);
-    if (ec) {
-      return;
-    }
-
-    handle_request<Request, Reply>(ec, request_str, reply_str, fn);
+    return false;
   }
 
 private:
-  void resolve(boost::system::error_code &ec, std::any &op, std::wstring url) {
-    if (!this->routes_.contains(url)) {
-      ec =
-          boost::system::errc::make_error_code(boost::system::errc::no_message);
-      return;
-    }
-    op = this->routes_[url];
-  }
-
-  void add_route(std::wstring url, std::any operation) {
-    this->routes_[url] = operation;
-  }
-
-  std::map<std::wstring, std::any> routes_;
+  std::vector<std::reference_wrapper<Service>> services_;
 };
+
+void default_handler(ServiceMiddleware &middl,
+                     const winnet::http::simple_request &request,
+                     winnet::http::simple_response &response) {
+  boost::system::error_code ec;
+
+  // todo: validate content type etc.
+
+  // grpc always send success in http headers.
+  response.set_status_code(200);
+  response.set_reason("OK");
+  response.set_content_type("application/grpc+proto");
+
+  PHTTP_REQUEST req = request.get_request();
+  BOOST_LOG_TRIVIAL(debug) << "url path is " << req->CookedUrl.pAbsPath;
+
+  std::string request_str = request.get_body_string();
+  std::string reply_str;
+  std::wstring url = std::wstring(req->CookedUrl.pAbsPath);
+  bool found = middl.handle_request(ec, url, request_str, reply_str);
+  if (!found) {
+    BOOST_LOG_TRIVIAL(debug) << "url not found " << url;
+    response.add_trailer("grpc-status", "3"); // invalid
+    response.add_trailer("grpc-message", "various-error");
+    return;
+  }
+
+  if (ec) {
+    BOOST_LOG_TRIVIAL(debug) << "handler has error " << ec;
+    response.add_trailer("grpc-status", "3"); // invalid
+    response.add_trailer("grpc-message", "various-error");
+    return;
+  }
+
+  BOOST_LOG_TRIVIAL(debug) << "reply len is " << reply_str.size();
+  response.set_body(reply_str);
+  response.add_trailer("grpc-status", "0"); // OK
+}
 
 } // namespace wingrpc
 } // namespace boost

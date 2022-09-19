@@ -7,8 +7,8 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(wingrpc_MAIN_PROJECT ON)
 endif()
 
-option(wingrpc_BuildTests     "Build the unit tests when BUILD_TESTING is enabled." ${winasio_MAIN_PROJECT})
-option(wingrpc_BuildExamples  "Build examples"                                      ${winasio_MAIN_PROJECT})
+option(wingrpc_BuildTests     "Build the unit tests when BUILD_TESTING is enabled." ${wingrpc_MAIN_PROJECT})
+option(wingrpc_BuildExamples  "Build examples"                                      ${wingrpc_MAIN_PROJECT})
 
 # import winext
 message(STATUS "feching winasio")

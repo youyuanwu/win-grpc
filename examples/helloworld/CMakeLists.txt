@@ -1,8 +1,12 @@
-set (CMAKE_CXX_STANDARD 20)
+set (CMAKE_CXX_STANDARD 14)
 
-add_executable(helloworldserver main.cpp)
+set(_server_exe helloworld_server)
+add_executable(${_server_exe} main.cpp)
 
-target_link_libraries(helloworldserver PRIVATE wingrpc libprotobuf)
+set(_client_exe helloworld_client)
+add_executable(${_client_exe} client_main.cpp)
+
+set(_shared_lib helloworld_lib)
 
 # maybe this is needed.
 #add_dependencies(helloworldserver protobuf::protoc)
@@ -34,10 +38,12 @@ protobuf_generate(LANGUAGE grpc
     PROTOS ${_proto_file_path}
 )
 
-
-target_sources(helloworldserver PRIVATE ${PROTO_SRCS} ${PROTO_HDRS} ${GRPC_SRCS})
-
-target_include_directories(helloworldserver
-    PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+# library that contains helloworld generated code
+add_library(${_shared_lib} ${PROTO_SRCS} ${PROTO_HDRS} ${GRPC_SRCS})
+target_include_directories(${_shared_lib}
+    PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
 )
+target_link_libraries(${_shared_lib} PUBLIC wingrpc libprotobuf)
+
+target_link_libraries(${_server_exe} PRIVATE ${_shared_lib})
+target_link_libraries(${_client_exe} PRIVATE ${_shared_lib})

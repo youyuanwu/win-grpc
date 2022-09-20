@@ -1,4 +1,4 @@
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 20) # require std::optional etc
 
 set(_server_exe helloworld_server)
 add_executable(${_server_exe} main.cpp)

@@ -14,7 +14,7 @@ int main() {
   // init http module
   winnet::http::http_initializer init;
   // add https then this becomes https server
-  std::wstring url = L"https://localhost:12356/";
+  std::wstring url = L"http://localhost:12356/";
 
   boost::system::error_code ec;
   net::io_context io_context;

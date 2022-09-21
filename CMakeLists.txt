@@ -10,7 +10,7 @@ endif()
 option(wingrpc_BuildTests     "Build the unit tests when BUILD_TESTING is enabled." ${wingrpc_MAIN_PROJECT})
 option(wingrpc_BuildExamples  "Build examples"                                      ${wingrpc_MAIN_PROJECT})
 
-option(wingrpc_LocalDevMode     "Use local winasio repo" ON)
+option(wingrpc_LocalDevMode     "Use local winasio repo" OFF)
 
 if(NOT wingrpc_LocalDevMode)
   # import winext
@@ -18,7 +18,7 @@ if(NOT wingrpc_LocalDevMode)
   include(FetchContent)
   FetchContent_Declare(winasio
     GIT_REPOSITORY https://github.com/youyuanwu/winasio.git
-    GIT_TAG 2524df3f2d6c95ec9119613714c4d744a42ac096)
+    GIT_TAG 0a2bfb519b0a33b5639a16a46a712e12d5658127)
   FetchContent_GetProperties(winasio)
   if(NOT winasio_POPULATED)
     FetchContent_Populate(winasio)

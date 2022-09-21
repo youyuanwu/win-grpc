@@ -213,6 +213,8 @@ void client_exec(
   std::string request_payload;
   encode_length_prefixed_message(*request, request_payload);
   req->set_body(std::move(request_payload));
+  // TODO: hack to skip verify.
+  req->pl_.insecure_skip_verify = true;
 
   winnet::winhttp::async_exec(
       req->pl_, h_connect, req->h_request_, req->dynamic_body_buff_,

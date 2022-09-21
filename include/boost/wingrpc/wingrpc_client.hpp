@@ -12,6 +12,38 @@ namespace wingrpc {
 namespace winnet = boost::winasio;
 namespace net = boost::asio;
 
+template <typename Executor>
+void configure_grpc_session(
+    winnet::winhttp::basic_winhttp_session_handle<Executor> &h_session,
+    _Out_ boost::system::error_code &ec) {
+  // set to http2 version
+  const DWORD f_enable_HTTP2 = WINHTTP_PROTOCOL_FLAG_HTTP2;
+  h_session.set_option(WINHTTP_OPTION_ENABLE_HTTP_PROTOCOL,
+                       (PVOID)&f_enable_HTTP2, sizeof(f_enable_HTTP2), ec);
+  if (ec) {
+    BOOST_LOG_TRIVIAL(debug) << L"set_option for http2 failed: " << ec;
+    return;
+  }
+
+  // This is need to receiveing trailer
+  const DWORD f_stream_end = 1; // set to true
+  h_session.set_option(WINHTTP_OPTION_REQUIRE_STREAM_END, (PVOID)&f_stream_end,
+                       sizeof(f_stream_end), ec);
+  if (ec) {
+    BOOST_LOG_TRIVIAL(debug) << L"set_option for stream end failed: " << ec;
+    return;
+  }
+
+  const DWORD f_tls_protocols =
+      WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2 | WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_3;
+  h_session.set_option(WINHTTP_OPTION_SECURE_PROTOCOLS, (PVOID)&f_tls_protocols,
+                       sizeof(f_tls_protocols), ec);
+  if (ec) {
+    BOOST_LOG_TRIVIAL(debug) << L"set_option for tlsProtocols failed: " << ec;
+    return;
+  }
+}
+
 // holds data that persists during async call
 //
 // path and accept do not need to be persisted.

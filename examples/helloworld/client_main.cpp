@@ -19,30 +19,8 @@ int main() {
     return EXIT_FAILURE;
   }
 
-  // set to http2 version
-  const DWORD enableHTTP2Flag = WINHTTP_PROTOCOL_FLAG_HTTP2;
-  h_session.set_option(WINHTTP_OPTION_ENABLE_HTTP_PROTOCOL,
-                       (PVOID)&enableHTTP2Flag, sizeof(enableHTTP2Flag), ec);
+  grpc::configure_grpc_session(h_session, ec);
   if (ec) {
-    BOOST_LOG_TRIVIAL(debug) << L"set_option for http2 failed: " << ec;
-    return EXIT_FAILURE;
-  }
-
-  // This is need to receiveing trailer
-  DWORD stream_end = 1; // set to true
-  h_session.set_option(WINHTTP_OPTION_REQUIRE_STREAM_END, (PVOID)&stream_end,
-                       sizeof(stream_end), ec);
-  if (ec) {
-    BOOST_LOG_TRIVIAL(debug) << L"set_option for stream end failed: " << ec;
-    return EXIT_FAILURE;
-  }
-
-  const DWORD tlsProtocols =
-      WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2 | WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_3;
-  h_session.set_option(WINHTTP_OPTION_SECURE_PROTOCOLS, (PVOID)&tlsProtocols,
-                       sizeof(tlsProtocols), ec);
-  if (ec) {
-    BOOST_LOG_TRIVIAL(debug) << L"set_option for tlsProtocols failed: " << ec;
     return EXIT_FAILURE;
   }
 
@@ -65,6 +43,8 @@ int main() {
   client c(h_connect);
 
   helloworld::HelloRequest request;
+  request.set_name("winhttp");
+
   c.SayHello(&request, [](boost::system::error_code ec,
                           const helloworld::HelloReply *response) {
     if (ec) {

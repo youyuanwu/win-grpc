@@ -67,59 +67,21 @@ int main() {
   helloworld::HelloRequest request;
   c.SayHello(&request, [](boost::system::error_code ec,
                           const helloworld::HelloReply *response) {
-    BOOST_LOG_TRIVIAL(debug) << "SayHello invoked: ";
+    if (ec) {
+      BOOST_LOG_TRIVIAL(debug) << "SayHello failed: " << ec;
+      return;
+    }
+    BOOST_LOG_TRIVIAL(debug) << "SayHello Reply: " << response->message();
   });
 
-  // winnet::winhttp::payload pl;
-  // pl.method = L"GET";
-  // pl.path = std::nullopt;
-  // pl.header = std::nullopt;
-  // pl.accept = std::nullopt;
-  // pl.body = std::nullopt;
-  // pl.secure = true;
-
-  // winnet::winhttp::basic_winhttp_request_asio_handle<
-  //     net::io_context::executor_type>
-  //     h_request(io_context.get_executor());
-
-  // std::vector<BYTE> body_buff;
-  // auto buff = net::dynamic_buffer(body_buff);
-  // winnet::winhttp::async_exec(
-  //     pl, h_connect, h_request, buff,
-  //     [&h_request, &buff](boost::system::error_code ec, std::size_t) {
-  //       BOOST_LOG_TRIVIAL(debug) << "async_exec handler";
-  //       if (ec) {
-  //         BOOST_LOG_TRIVIAL(debug) << "Hanlder error" << ec;
-  //         return;
-  //       }
-
-  //       // print result
-  //       std::wstring headers;
-  //       winnet::winhttp::header::get_all_raw_crlf(h_request, ec, headers);
-  //       if (ec) {
-  //         BOOST_LOG_TRIVIAL(debug) << "fail to get headers" << ec;
-  //         return;
-  //       }
-  //       BOOST_LOG_TRIVIAL(debug) << headers;
-  //       BOOST_LOG_TRIVIAL(debug) << winnet::winhttp::buff_to_string(buff);
-
-  //       // more tests
-  //       // check status
-  //       DWORD dwStatusCode;
-  //       winnet::winhttp::header::get_status_code(h_request, ec,
-  //       dwStatusCode); if (ec) {
-  //         BOOST_LOG_TRIVIAL(debug) << "fail to get status code" << ec;
-  //         return;
-  //       }
-
-  //       std::wstring trailers;
-  //       winnet::winhttp::header::get_trailers(h_request, ec, trailers);
-  //       if (ec) {
-  //         BOOST_LOG_TRIVIAL(debug) << "fail to get trailers " << ec;
-  //         return;
-  //       }
-  //       BOOST_LOG_TRIVIAL(debug) << "trailers: " << trailers;
-  //     });
+  // c.SayHello(&request, [](boost::system::error_code ec,
+  //                         const helloworld::HelloReply *response) {
+  //   if(ec){
+  //     BOOST_LOG_TRIVIAL(debug) << "SayHello2 failed: " << ec;
+  //     return;
+  //   }
+  //   BOOST_LOG_TRIVIAL(debug) << "SayHello2 Reply: " << response->message();
+  // });
 
   io_context.run();
 }

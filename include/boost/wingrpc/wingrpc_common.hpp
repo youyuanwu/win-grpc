@@ -38,8 +38,7 @@ inline void parse_length_prefixed_message(boost::system::error_code &ec,
 }
 
 template <typename Proto>
-void encode_length_prefixed_message(const Proto &reply,
-                                    std::string &msgout) {
+void encode_length_prefixed_message(const Proto &reply, std::string &msgout) {
   std::string encoded_reply = reply.SerializeAsString();
   std::int32_t reply_len = static_cast<std::int32_t>(encoded_reply.size());
   std::vector<BYTE> meta(4, 0); // encode 4 bytes big endian for length
@@ -52,7 +51,6 @@ void encode_length_prefixed_message(const Proto &reply,
   msgout += std::string(meta.begin(), meta.end());
   msgout += encoded_reply;
 }
-
 
 } // namespace wingrpc
 } // namespace boost

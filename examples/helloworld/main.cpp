@@ -14,7 +14,7 @@ int main() {
   // init http module
   winnet::http::http_initializer init;
   // add https then this becomes https server
-  std::wstring url = L"http://localhost:12356/";
+  std::wstring url = L"https://localhost:12356/";
 
   boost::system::error_code ec;
   net::io_context io_context;
@@ -28,7 +28,8 @@ int main() {
   winnet::http::basic_http_handle<net::io_context::executor_type> queue(
       io_context);
   queue.assign(winnet::http::open_raw_http_queue());
-  winnet::http::http_simple_url<net::io_context::executor_type> simple_url(queue, url);
+  winnet::http::http_simple_url<net::io_context::executor_type> simple_url(
+      queue, url);
 
   auto handler = std::bind(grpc::default_handler, middl, std::placeholders::_1,
                            std::placeholders::_2);

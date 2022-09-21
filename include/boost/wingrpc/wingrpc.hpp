@@ -122,7 +122,10 @@ void default_handler(ServiceMiddleware &middl,
   response.set_content_type("application/grpc+proto");
 
   PHTTP_REQUEST req = request.get_request();
+  BOOST_LOG_TRIVIAL(debug) << "http version " << req->Version.MajorVersion
+                           << "." << req->Version.MinorVersion;
   BOOST_LOG_TRIVIAL(debug) << "url path is " << req->CookedUrl.pAbsPath;
+  // BOOST_LOG_TRIVIAL(debug) << "request content:" << request;
 
   std::string request_str = request.get_body_string();
   std::string reply_str;

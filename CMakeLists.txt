@@ -10,7 +10,7 @@ endif()
 option(wingrpc_BuildTests     "Build the unit tests when BUILD_TESTING is enabled." ${wingrpc_MAIN_PROJECT})
 option(wingrpc_BuildExamples  "Build examples"                                      ${wingrpc_MAIN_PROJECT})
 
-option(wingrpc_LocalDevMode     "Use local winasio repo" OFF)
+option(wingrpc_LocalDevMode     "Use local winasio repo" ON)
 
 if(NOT wingrpc_LocalDevMode)
   # import winext

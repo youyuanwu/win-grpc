@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/log/trivial.hpp>
+
 // shared by server and client
 
 namespace boost {

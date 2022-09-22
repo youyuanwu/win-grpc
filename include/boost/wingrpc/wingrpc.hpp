@@ -1,6 +1,12 @@
 #pragma once
 
 #include "boost/wingrpc/wingrpc_common.hpp"
+#include <boost/asio.hpp>
+#include <boost/winasio/http/convert.hpp>
+#include <boost/winasio/http/http.hpp>
+
+namespace net = boost::asio;
+namespace winnet = boost::winasio;
 
 #include <string>
 
@@ -63,9 +69,9 @@ private:
   std::vector<std::reference_wrapper<Service>> services_;
 };
 
-void default_handler(ServiceMiddleware &middl,
-                     const winnet::http::simple_request &request,
-                     winnet::http::simple_response &response) {
+inline void default_handler(ServiceMiddleware &middl,
+                            const winnet::http::simple_request &request,
+                            winnet::http::simple_response &response) {
   boost::system::error_code ec;
 
   // todo: validate content type etc.

@@ -34,7 +34,8 @@ class WinCppGrpcGenerator : public grpc::protobuf::compiler::CodeGenerator {
     std::unique_ptr<grpc::protobuf::io::ZeroCopyOutputStream> source_output(
     context->Open(file_name + ".win_grpc.pb.cc"));
     grpc::protobuf::io::CodedOutputStream source_coded_out(source_output.get());
-    std::string source_code = "//my src content";
+    std::string source_code = win_grpc_generator::GetSourcePrologue(&pbfile) +
+      win_grpc_generator::GetSourceServices(&pbfile);
     source_coded_out.WriteRaw(source_code.data(), source_code.size());
 
     return true;

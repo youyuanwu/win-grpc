@@ -184,7 +184,7 @@ void PrintSourceServerRouterApplyMethodEntry(grpc_generator::Printer* printer,
   if (method->NoStreaming()) {
     printer->Print(*vars,
       "if(url == L\"/$Package$$Service$/$Method$\") { \n"
-      "  auto op = std::bind(&Greeter::Service::SayHello, this, " 
+      "  auto op = std::bind(&$Service$::Service::$Method$, this, " 
       "  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);\n"
       "  boost::wingrpc::handle_request<$Request$, $Response$>(ec, request, response, op); \n"
       "  return true;\n"
@@ -198,7 +198,7 @@ void PrintSourceServerRouterApply(grpc_generator::Printer* printer,
                                   const grpc_generator::Service* service,
                                   std::map<grpc::string, grpc::string>* vars) {
   printer->Print(*vars,
-    "bool Greeter::Service::HandleRequest(boost::system::error_code &ec, std::wstring const & url, std::string const & request, std::string & response) {\n");
+    "bool $Service$::Service::HandleRequest(boost::system::error_code &ec, std::wstring const & url, std::string const & request, std::string & response) {\n");
   printer->Indent();
   for (int i = 0; i < service->method_count(); ++i) {
     PrintSourceServerRouterApplyMethodEntry(printer, service->method(i).get(), vars);
@@ -216,10 +216,8 @@ void PrintSourceServerMethodSync(grpc_generator::Printer* printer,
   (*vars)["Response"] = method->output_type_name();
   printer->Print(method->GetLeadingComments("//").c_str());
   if (method->NoStreaming()) {
-    // printer->Print(*vars,
-    //                "virtual void $Method$("
-    //                "boost::system::error_code &ec, const $Request$* request, "
-    //                "$Response$* response) = 0;\n");
+    printer->Print(*vars,
+      "// NoStreaming for method $Method$ request $Request$ response $Response$ not supported\n");
   } else if (ClientOnlyStreaming(method)) {
     printer->Print(*vars,
       "// ClientOnlyStreaming for method $Method$ request $Request$ response $Response$ not supported\n");
@@ -259,8 +257,6 @@ grpc::string GetSourceServices(grpc_generator::File* file) {
     if (!file->package().empty()) {
       vars["Package"].append(".");
     }
-    vars["ns"] = "";
-    vars["prefix"] = "";
   
     for (int i = 0; i < file->service_count(); ++i) {
       PrintSourceService(printer.get(), file->service(i).get(), &vars);

@@ -2,8 +2,8 @@
 
 #include "boost/wingrpc/wingrpc_common.hpp"
 #include <boost/asio.hpp>
-#include <boost/winasio/http/http.hpp>
 #include <boost/winasio/http/convert.hpp>
+#include <boost/winasio/http/http.hpp>
 
 namespace net = boost::asio;
 namespace winnet = boost::winasio;
@@ -70,8 +70,8 @@ private:
 };
 
 inline void default_handler(ServiceMiddleware &middl,
-                     const winnet::http::simple_request &request,
-                     winnet::http::simple_response &response) {
+                            const winnet::http::simple_request &request,
+                            winnet::http::simple_response &response) {
   boost::system::error_code ec;
 
   // todo: validate content type etc.

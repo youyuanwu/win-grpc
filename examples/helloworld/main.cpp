@@ -28,7 +28,8 @@ int main() {
   winnet::http::basic_http_handle<net::io_context::executor_type> queue(
       io_context);
   queue.assign(winnet::http::open_raw_http_queue());
-  winnet::http::http_simple_url simple_url(queue, url);
+  winnet::http::http_simple_url<net::io_context::executor_type> simple_url(
+      queue, url);
 
   auto handler = std::bind(grpc::default_handler, middl, std::placeholders::_1,
                            std::placeholders::_2);

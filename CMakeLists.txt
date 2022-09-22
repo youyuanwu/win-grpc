@@ -10,16 +10,26 @@ endif()
 option(wingrpc_BuildTests     "Build the unit tests when BUILD_TESTING is enabled." ${wingrpc_MAIN_PROJECT})
 option(wingrpc_BuildExamples  "Build examples"                                      ${wingrpc_MAIN_PROJECT})
 
-# import winext
-message(STATUS "feching winasio")
-include(FetchContent)
-FetchContent_Declare(winasio
-  GIT_REPOSITORY https://github.com/youyuanwu/winasio.git
-  GIT_TAG 3ec686202443e9cd9cc667f6943ca77754a84b9a)
-FetchContent_GetProperties(winasio)
-if(NOT winasio_POPULATED)
-  FetchContent_Populate(winasio)
-endif()
+option(wingrpc_LocalDevMode     "Use local winasio repo" OFF)
+
+if(NOT wingrpc_LocalDevMode)
+  # import winext
+  message(STATUS "feching winasio")
+  include(FetchContent)
+  FetchContent_Declare(winasio
+    GIT_REPOSITORY https://github.com/youyuanwu/winasio.git
+    GIT_TAG 916afd9701cf9eb931338d2dcb50c5cb4aacd58b)
+  FetchContent_GetProperties(winasio)
+  if(NOT winasio_POPULATED)
+    FetchContent_Populate(winasio)
+    # add subdir is outside and after fmt targets.
+  endif()
+else()
+  # winasio repo must be located parallel to wingrpc
+  message(STATUS "Using winasio LocalDevMode. This should not be used in CI.")
+  set(winasio_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../winasio)
+  set(winasio_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/local/winasio)
+endif(NOT wingrpc_LocalDevMode)
 
 if(${wingrpc_MAIN_PROJECT})
   # format
@@ -38,6 +48,7 @@ if (TARGET libprotobuf-lite)
 else()
 # import protobuf
 message(STATUS "fetching protobuf")
+include(FetchContent)
 FetchContent_Declare(
         protobuf
         GIT_REPOSITORY https://github.com/protocolbuffers/protobuf.git

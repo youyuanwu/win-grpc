@@ -18,7 +18,7 @@ if(NOT wingrpc_LocalDevMode)
   include(FetchContent)
   FetchContent_Declare(winasio
     GIT_REPOSITORY https://github.com/youyuanwu/winasio.git
-    GIT_TAG 0a2bfb519b0a33b5639a16a46a712e12d5658127)
+    GIT_TAG 916afd9701cf9eb931338d2dcb50c5cb4aacd58b)
   FetchContent_GetProperties(winasio)
   if(NOT winasio_POPULATED)
     FetchContent_Populate(winasio)
@@ -26,6 +26,7 @@ if(NOT wingrpc_LocalDevMode)
   endif()
 else()
   # winasio repo must be located parallel to wingrpc
+  message(STATUS "Using winasio LocalDevMode. This should not be used in CI.")
   set(winasio_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../winasio)
   set(winasio_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/local/winasio)
 endif(NOT wingrpc_LocalDevMode)

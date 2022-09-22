@@ -59,6 +59,11 @@ grpc::string GetSourcePrologue(grpc_generator::File* file) {
                    "// If you make any local change, they will be lost.\n");
     printer->Print(vars, "// source: $filename$\n\n");
 
+    // Include boost winasio http headers
+    printer->Print(vars, "#include <boost/winasio/http/http.hpp>\n");
+    printer->Print(vars, "#include <boost/winasio/http/temp.hpp>\n");
+
+    // Include service headers
     printer->Print(vars, "#include \"$filename_base$$message_header_ext$\"\n");
     printer->Print(vars, "#include \"$filename_base$$service_header_ext$\"\n");
     printer->Print(vars, "\n");

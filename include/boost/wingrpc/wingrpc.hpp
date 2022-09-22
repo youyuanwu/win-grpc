@@ -69,7 +69,7 @@ private:
   std::vector<std::reference_wrapper<Service>> services_;
 };
 
-void default_handler(ServiceMiddleware &middl,
+inline void default_handler(ServiceMiddleware &middl,
                      const winnet::http::simple_request &request,
                      winnet::http::simple_response &response) {
   boost::system::error_code ec;

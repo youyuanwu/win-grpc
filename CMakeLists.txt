@@ -18,7 +18,7 @@ if(NOT wingrpc_LocalDevMode)
   include(FetchContent)
   FetchContent_Declare(winasio
     GIT_REPOSITORY https://github.com/youyuanwu/winasio.git
-    GIT_TAG 49ffd7e04558fb23e834a75ca1b8af1c2082f1a1)
+    GIT_TAG 4f5a7a5f7a3825e6827f4212876b1a1fb5659839)
   FetchContent_GetProperties(winasio)
   if(NOT winasio_POPULATED)
     FetchContent_Populate(winasio)

@@ -33,7 +33,7 @@ endif(NOT wingrpc_LocalDevMode)
 
 if(${wingrpc_MAIN_PROJECT})
   # format
-  include(${winasio_SOURCE_DIR}/cmake/clang-format.cmake)
+  include(cmake/clang-format.cmake)
 endif(${wingrpc_MAIN_PROJECT})
 if(WINASIO_CI_FORMAT)
   message(STATUS "Only added format target.")

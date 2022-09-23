@@ -58,6 +58,8 @@ win_cpp_plugin.cpp
 win_cpp_plugin.hpp
 win_grpc_generator.cpp
 win_grpc_generator.hpp
+win_grpc_client_generator.cpp
+win_grpc_client_generator.hpp
 )
 
 add_executable(win_grpc_cpp_plugin 

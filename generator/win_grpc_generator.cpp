@@ -1,15 +1,7 @@
 #include "win_grpc_generator.hpp"
+#include "win_grpc_genrator_common.hpp"
 
 namespace win_grpc_generator {
-
-
-inline bool ClientOnlyStreaming(const grpc_generator::Method* method) {
-  return method->ClientStreaming() && !method->ServerStreaming();
-}
-
-inline bool ServerOnlyStreaming(const grpc_generator::Method* method) {
-  return !method->ClientStreaming() && method->ServerStreaming();
-}
 
 grpc::string GetHeaderPrologue(grpc_generator::File* file){
   grpc::string output;

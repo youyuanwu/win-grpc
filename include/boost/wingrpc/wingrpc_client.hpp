@@ -1,5 +1,6 @@
 #pragma once
 
+#include "boost/winasio/winhttp/client.hpp"
 #include "boost/wingrpc/wingrpc_common.hpp"
 
 #include <map>

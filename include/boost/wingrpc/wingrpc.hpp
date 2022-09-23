@@ -1,5 +1,6 @@
 #pragma once
 
+#include "boost/winasio/http/convert.hpp" // simple_requests
 #include "boost/wingrpc/wingrpc_common.hpp"
 #include <boost/asio.hpp>
 #include <boost/winasio/http/convert.hpp>
@@ -13,14 +14,19 @@ namespace winnet = boost::winasio;
 namespace boost {
 namespace wingrpc {
 
+namespace net = boost::asio; // from <boost/asio.hpp>
+namespace winnet = boost::winasio;
+
+// TODO: generated code should be changed.
+// request_str should be moved into this.
 template <typename Request, typename Reply>
 inline void handle_request(
-    boost::system::error_code &ec, const std::string &request_str,
+    boost::system::error_code &ec, std::string request_str,
     std::string &reply_str,
     std::function<void(boost::system::error_code &ec, const Request *, Reply *)>
         op) {
   Request req;
-  parse_length_prefixed_message(ec, request_str, req);
+  parse_length_prefixed_message(ec, std::move(request_str), req);
 
   if (ec) {
     // response.add_trailer("grpc-status", "3"); // invalid argument
@@ -51,9 +57,10 @@ public:
 class ServiceMiddleware {
 public:
   inline void add_service(Service &service) { services_.push_back(service); }
+
+  // requset should be moved into this.
   inline bool handle_request(boost::system::error_code &ec,
-                             std::wstring const &url,
-                             std::string const &request,
+                             std::wstring const &url, std::string request,
                              std::string &response) {
     // go through service one by one and dispatch
     for (auto &service : services_) {
@@ -87,10 +94,12 @@ inline void default_handler(ServiceMiddleware &middl,
   BOOST_LOG_TRIVIAL(debug) << "url path is " << req->CookedUrl.pAbsPath;
   // BOOST_LOG_TRIVIAL(debug) << "request content:" << request;
 
+  // make a copy of the request and move into parsing.
+  // TODO: maybe the winasio should expose way to consume the body string.
   std::string request_str = request.get_body_string();
   std::string reply_str;
   std::wstring url = std::wstring(req->CookedUrl.pAbsPath);
-  bool found = middl.handle_request(ec, url, request_str, reply_str);
+  bool found = middl.handle_request(ec, url, std::move(request_str), reply_str);
   if (!found) {
     BOOST_LOG_TRIVIAL(debug) << "url not found " << url;
     response.add_trailer("grpc-status", "3"); // invalid

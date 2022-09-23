@@ -1,3 +1,4 @@
+#include "boost/winasio/http/basic_http_url.hpp"
 #include "boost/winasio/http/http.hpp"
 #include "boost/winasio/http/temp.hpp"
 
@@ -25,11 +26,11 @@ int main() {
   middl.add_service(svr);
 
   // open queue handle
-  winnet::http::basic_http_handle<net::io_context::executor_type> queue(
+  winnet::http::basic_http_queue_handle<net::io_context::executor_type> queue(
       io_context);
   queue.assign(winnet::http::open_raw_http_queue());
-  winnet::http::http_simple_url<net::io_context::executor_type> simple_url(
-      queue, url);
+  winnet::http::basic_http_url<net::io_context::executor_type> simple_url(queue,
+                                                                          url);
 
   auto handler = std::bind(grpc::default_handler, middl, std::placeholders::_1,
                            std::placeholders::_2);

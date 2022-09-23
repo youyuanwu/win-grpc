@@ -3,7 +3,8 @@
 
 #include "boost/winasio/winhttp/client.hpp"
 
-#include "client_stub.hpp"
+// #include "client_stub.hpp"
+#include "helloworld.win_grpc.pb.h"
 
 namespace net = boost::asio; // from <boost/asio.hpp>
 namespace winnet = boost::winasio;
@@ -40,10 +41,12 @@ int main() {
     return EXIT_FAILURE;
   }
 
-  client c(h_connect);
+  GreeterClient::Stub c(h_connect);
 
   helloworld::HelloRequest request;
   request.set_name("winhttp");
+  // request.SerializePartialToArray
+  // request.ByteSizeLong();
 
   c.SayHello(&request, [](boost::system::error_code ec,
                           const helloworld::HelloReply *response) {

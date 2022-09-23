@@ -89,27 +89,12 @@ void PrintHeaderServerMethodSync(grpc_generator::Printer* printer,
   printer->Print(method->GetTrailingComments("//").c_str());
 }
 
-void PrintHeaderServerRouterApplyMethodEntry(grpc_generator::Printer* printer,
-                                 const grpc_generator::Method* method,
-                                 std::map<grpc::string, grpc::string>* vars){
-  if (method->NoStreaming()) {
-    printer->Print(*vars,
-      "if(url == L\"/$Package$$Service$/$Method$\") { \n"
-      "  auto op = std::bind(&Service::SayHello, this, " 
-      "  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);\n"
-      "  boost::wingrpc::handle_request<$Request$, $Response$>(ec, request, response, op); \n"
-      "  return true;\n"
-      "}\n");
-  } else{
-        printer->Print(*vars, "// Streaming for method $Method$ request $Request$ response $Response$ not supported\n");
-  }
-}
-
 void PrintHeaderServerRouterApply(grpc_generator::Printer* printer,
                         const grpc_generator::Service* service,
                         std::map<grpc::string, grpc::string>* vars){
     printer->Print(*vars,
-      "bool HandleRequest(boost::system::error_code &ec, std::wstring const & url, std::string const & request, std::string & response) override;\n"
+      "// request should be moved into by caller.\n"
+      "bool HandleRequest(boost::system::error_code &ec, std::wstring const & url, std::string request, std::string & response) override;\n"
     );
 }
 
@@ -178,7 +163,7 @@ void PrintSourceServerRouterApplyMethodEntry(grpc_generator::Printer* printer,
       "if(url == L\"/$Package$$Service$/$Method$\") { \n"
       "  auto op = std::bind(&$Service$::Service::$Method$, this, " 
       "  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);\n"
-      "  boost::wingrpc::handle_request<$Request$, $Response$>(ec, request, response, op); \n"
+      "  boost::wingrpc::handle_request<$Request$, $Response$>(ec, std::move(request), response, op);\n"
       "  return true;\n"
       "}\n");
   } else{
@@ -190,7 +175,8 @@ void PrintSourceServerRouterApply(grpc_generator::Printer* printer,
                                   const grpc_generator::Service* service,
                                   std::map<grpc::string, grpc::string>* vars) {
   printer->Print(*vars,
-    "bool $Service$::Service::HandleRequest(boost::system::error_code &ec, std::wstring const & url, std::string const & request, std::string & response) {\n");
+    "// request should be moved into by caller.\n"
+    "bool $Service$::Service::HandleRequest(boost::system::error_code &ec, std::wstring const & url, std::string request, std::string & response) {\n");
   printer->Indent();
   for (int i = 0; i < service->method_count(); ++i) {
     PrintSourceServerRouterApplyMethodEntry(printer, service->method(i).get(), vars);

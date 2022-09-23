@@ -17,7 +17,6 @@ namespace wingrpc {
 namespace net = boost::asio; // from <boost/asio.hpp>
 namespace winnet = boost::winasio;
 
-// TODO: generated code should be changed.
 // request_str should be moved into this.
 template <typename Request, typename Reply>
 inline void handle_request(
@@ -48,9 +47,9 @@ inline void handle_request(
 // grpc service
 class Service {
 public:
+  // request needs to be moved into.
   virtual bool HandleRequest(boost::system::error_code &ec,
-                             std::wstring const &url,
-                             std::string const &request,
+                             std::wstring const &url, std::string request,
                              std::string &response) = 0;
 };
 
@@ -64,7 +63,8 @@ public:
                              std::string &response) {
     // go through service one by one and dispatch
     for (auto &service : services_) {
-      bool found = service.get().HandleRequest(ec, url, request, response);
+      bool found =
+          service.get().HandleRequest(ec, url, std::move(request), response);
       if (found) {
         return true;
       }

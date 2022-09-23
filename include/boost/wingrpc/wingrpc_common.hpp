@@ -20,29 +20,28 @@ inline void parse_length_prefixed_message(boost::system::error_code &ec,
   }
 
   bool compress = msg[0];
-  if(compress){
-    BOOST_LOG_TRIVIAL(debug)
-        << "msg compressed";
-  }else{
-    BOOST_LOG_TRIVIAL(debug)
-        << "msg content: " << msg;
+  if (compress) {
+    BOOST_LOG_TRIVIAL(debug) << "msg compressed";
+  } else {
+    BOOST_LOG_TRIVIAL(debug) << "msg content: " << msg;
   }
   std::uint32_t len = 0;
   len |= (std::uint8_t)msg[4];
   len |= (std::uint8_t)msg[3] << 8;
-  len |= (std::uint8_t)msg[2] << 16; 
+  len |= (std::uint8_t)msg[2] << 16;
   len |= (std::uint8_t)msg[1] << 24;
-  
+
   if (msg.size() - 5 != len) {
     BOOST_LOG_TRIVIAL(debug)
-        << "parse_length_prefixed_message msg size does not match. encode: " << len << "actual: " << (msg.size() - 5);
+        << "parse_length_prefixed_message msg size does not match. encode: "
+        << len << "actual: " << (msg.size() - 5);
     ec = boost::system::errc::make_error_code(
         boost::system::errc::invalid_argument);
     return;
   }
 
-  BOOST_LOG_TRIVIAL(debug)
-        << "parse_length_prefixed_message msg debug encode: " << len << "actual: " << (msg.size() - 5);
+  BOOST_LOG_TRIVIAL(debug) << "parse_length_prefixed_message msg debug encode: "
+                           << len << "actual: " << (msg.size() - 5);
 
   bool ok = proto.ParseFromArray(msg.data() + 5, len);
   if (!ok) {

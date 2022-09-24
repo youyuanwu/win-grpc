@@ -1,6 +1,8 @@
 #pragma once
 
+#ifdef WINASIO_LOG
 #include <boost/log/trivial.hpp>
+#endif
 
 // shared by server and client
 
@@ -13,7 +15,9 @@ template <typename ProtoIn>
 inline void parse_length_prefixed_message(boost::system::error_code &ec,
                                           std::string msg, ProtoIn &proto) {
   if (msg.size() < 5) {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug) << "parse_length_prefixed_message msg too small";
+#endif
     ec = boost::system::errc::make_error_code(
         boost::system::errc::invalid_argument);
     return;
@@ -21,9 +25,13 @@ inline void parse_length_prefixed_message(boost::system::error_code &ec,
 
   bool compress = msg[0];
   if (compress) {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug) << "msg compressed";
+#endif
   } else {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug) << "msg content: " << msg;
+#endif
   }
   std::uint32_t len = 0;
   len |= (std::uint8_t)msg[4];
@@ -32,20 +40,26 @@ inline void parse_length_prefixed_message(boost::system::error_code &ec,
   len |= (std::uint8_t)msg[1] << 24;
 
   if (msg.size() - 5 != len) {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug)
         << "parse_length_prefixed_message msg size does not match. encode: "
         << len << "actual: " << (msg.size() - 5);
+#endif
     ec = boost::system::errc::make_error_code(
         boost::system::errc::invalid_argument);
     return;
   }
 
+#ifdef WINASIO_LOG
   BOOST_LOG_TRIVIAL(debug) << "parse_length_prefixed_message msg debug encode: "
                            << len << "actual: " << (msg.size() - 5);
+#endif
 
   bool ok = proto.ParseFromArray(msg.data() + 5, len);
   if (!ok) {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug) << "parse_length_prefixed_message bad proto msg";
+#endif
     ec = boost::system::errc::make_error_code(
         boost::system::errc::invalid_argument);
     return;

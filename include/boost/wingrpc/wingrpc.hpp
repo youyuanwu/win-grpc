@@ -89,9 +89,11 @@ inline void default_handler(ServiceMiddleware &middl,
   response.set_content_type("application/grpc+proto");
 
   PHTTP_REQUEST req = request.get_request();
+#ifdef WINASIO_LOG
   BOOST_LOG_TRIVIAL(debug) << "http version " << req->Version.MajorVersion
                            << "." << req->Version.MinorVersion;
   BOOST_LOG_TRIVIAL(debug) << "url path is " << req->CookedUrl.pAbsPath;
+#endif
   // BOOST_LOG_TRIVIAL(debug) << "request content:" << request;
 
   // make a copy of the request and move into parsing.
@@ -101,20 +103,26 @@ inline void default_handler(ServiceMiddleware &middl,
   std::wstring url = std::wstring(req->CookedUrl.pAbsPath);
   bool found = middl.handle_request(ec, url, std::move(request_str), reply_str);
   if (!found) {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug) << "url not found " << url;
+#endif
     response.add_trailer("grpc-status", "3"); // invalid
     response.add_trailer("grpc-message", "various-error");
     return;
   }
 
   if (ec) {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug) << "handler has error " << ec;
+#endif
     response.add_trailer("grpc-status", "3"); // invalid
     response.add_trailer("grpc-message", "various-error");
     return;
   }
 
+#ifdef WINASIO_LOG
   BOOST_LOG_TRIVIAL(debug) << "reply len is " << reply_str.size();
+#endif
   response.set_body(reply_str);
   response.add_trailer("grpc-status", "0"); // OK
 }

@@ -1,5 +1,7 @@
 set (CMAKE_CXX_STANDARD 20) # require std::optional etc
 
+add_compile_definitions(WINASIO_LOG) # enable logging
+
 set(_server_exe helloworld_server)
 add_executable(${_server_exe} main.cpp)
 

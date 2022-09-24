@@ -22,7 +22,9 @@ void configure_grpc_session(
   h_session.set_option(WINHTTP_OPTION_ENABLE_HTTP_PROTOCOL,
                        (PVOID)&f_enable_HTTP2, sizeof(f_enable_HTTP2), ec);
   if (ec) {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug) << L"set_option for http2 failed: " << ec;
+#endif
     return;
   }
 
@@ -31,7 +33,9 @@ void configure_grpc_session(
   h_session.set_option(WINHTTP_OPTION_REQUIRE_STREAM_END, (PVOID)&f_stream_end,
                        sizeof(f_stream_end), ec);
   if (ec) {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug) << L"set_option for stream end failed: " << ec;
+#endif
     return;
   }
 
@@ -40,7 +44,9 @@ void configure_grpc_session(
   h_session.set_option(WINHTTP_OPTION_SECURE_PROTOCOLS, (PVOID)&f_tls_protocols,
                        sizeof(f_tls_protocols), ec);
   if (ec) {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug) << L"set_option for tlsProtocols failed: " << ec;
+#endif
     return;
   }
 }
@@ -60,7 +66,7 @@ public:
     this->pl_.method = L"POST";
     this->pl_.accept =
         std::make_optional<winnet::winhttp::header::accept_types>(
-            {L"application/grpc+proto"});
+            {std::wstring(L"application/grpc+proto")});
     this->pl_.secure = true;
   }
 
@@ -88,7 +94,9 @@ void handle_response(
   Response response_proto;
   parse_length_prefixed_message(ec, response_str, response_proto);
   if (ec) {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug) << "fail to parse response " << ec;
+#endif
     return;
   }
   token(ec, &response_proto);
@@ -117,7 +125,6 @@ inline void parse_trailers(_In_ std::wstring const &trailer_str,
     bool last = (pos == std::wstring::npos);
 
     std::wstring kv = trailer_str.substr(kv_index, pos);
-    // BOOST_LOG_TRIVIAL(debug) << "kv : " << kv;
 
     if (kv.size() == 0) {
       break;
@@ -127,7 +134,6 @@ inline void parse_trailers(_In_ std::wstring const &trailer_str,
     std::wstring key = kv.substr(0, colon_space);
     std::wstring val = kv.substr(colon_space + 2); // to end of str
     out[key] = val;
-    // BOOST_LOG_TRIVIAL(debug) << "key [" << key << "] val [" << val <<"]";
 
     kv_index = pos;
     kv_index += 2; // skip 2 chars
@@ -170,14 +176,18 @@ void validate_response(
   std::wstring headers;
   winnet::winhttp::header::get_all_raw_crlf(h, ec, headers);
   if (ec) {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug) << "fail to get headers" << ec;
+#endif
     return;
   }
 
   std::wstring trailers;
   winnet::winhttp::header::get_trailers(h, ec, trailers);
   if (ec) {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug) << "fail to get trailers " << ec;
+#endif
     return;
   }
   // BOOST_LOG_TRIVIAL(debug) << "trailers: [" << trailers <<"]";
@@ -186,7 +196,9 @@ void validate_response(
   std::wstring code;
   bool ok = get_grpc_status(trailer_map, code);
   if (!ok) {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug) << "cannot get status code" << ec;
+#endif
     ec = boost::system::errc::make_error_code(
         boost::system::errc::no_message_available);
     return;
@@ -198,7 +210,9 @@ void validate_response(
   std::wstring message;
   ok = get_grpc_message(trailer_map, message);
   if (ok) {
+#ifdef WINASIO_LOG
     BOOST_LOG_TRIVIAL(debug) << "grpc failed with msg:" << message;
+#endif
   }
 }
 
@@ -221,9 +235,13 @@ void client_exec(
       req->pl_, h_connect, req->h_request_, req->dynamic_body_buff_,
       [req, token = std::move(token)](boost::system::error_code ec,
                                       std::size_t) mutable {
+#ifdef WINASIO_LOG
         BOOST_LOG_TRIVIAL(debug) << "async_exec handler";
+#endif
         if (ec) {
+#ifdef WINASIO_LOG
           BOOST_LOG_TRIVIAL(debug) << "Hanlder error" << ec;
+#endif
           token(ec, nullptr);
           return;
         }

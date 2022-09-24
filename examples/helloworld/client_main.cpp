@@ -6,6 +6,8 @@
 // #include "client_stub.hpp"
 #include "helloworld.win_grpc.pb.h"
 
+#include <boost/log/trivial.hpp>
+
 namespace net = boost::asio; // from <boost/asio.hpp>
 namespace winnet = boost::winasio;
 

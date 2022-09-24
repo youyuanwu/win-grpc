@@ -3,6 +3,7 @@
 #include "src/compiler/generator_helpers.h"
 #include "src/compiler/protobuf_plugin.h"
 #include "win_grpc_generator.hpp"
+#include "win_grpc_client_generator.hpp"
 
 class WinCppGrpcGenerator : public grpc::protobuf::compiler::CodeGenerator {
  public:
@@ -28,7 +29,9 @@ class WinCppGrpcGenerator : public grpc::protobuf::compiler::CodeGenerator {
         context->Open(file_name + ".win_grpc.pb.h"));
     grpc::protobuf::io::CodedOutputStream header_coded_out(header_output.get());
     grpc::string header_code = win_grpc_generator::GetHeaderPrologue(&pbfile) +
-      win_grpc_generator::GetHeaderServices(&pbfile);
+      win_grpc_generator::GetHeaderServices(&pbfile) +
+      "// client content:\n"
+      + win_grpc_generator::GetClientHeaderServices(&pbfile);
     header_coded_out.WriteRaw(header_code.data(), header_code.size());
 
     std::unique_ptr<grpc::protobuf::io::ZeroCopyOutputStream> source_output(
